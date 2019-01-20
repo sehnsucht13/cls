@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 
-DIR *dirStream;
 struct dirent **dirFile;
 int numOfFiles;
 
@@ -22,10 +21,10 @@ int displayAllFiles(const struct dirent *entry){
     return 1;
 }
 
-void listDirFiles(char *dirName, int (*f) (const struct dirent *entry)){
+void printDirFiles(char *dirName, int (*f) (const struct dirent *entry), int recursive){
     numOfFiles = scandir(dirName, &dirFile, f, NULL);
-    if (numOfFiles >=0){
-        int currIndex = 0;
+    int currIndex = 0;
+    if (numOfFiles >=0 && recursive == 0){
         for(currIndex; currIndex < numOfFiles; currIndex++){
             printf("%s\n", dirFile[currIndex]->d_name);
         }
@@ -36,14 +35,26 @@ void listDirFiles(char *dirName, int (*f) (const struct dirent *entry)){
 }
 
 void listCurrDir(){
-    printf("Listing current directory\n");
     char *currWorkDir = getcwd(NULL, 0);
-    listDirFiles(currWorkDir, NULL);
+    if(currWorkDir != NULL){
+    printDirFiles(currWorkDir, NULL, 0);
+    }
+    else{
+        printf("Error occured while displaying current directory\n");
+    }
 }
 
+void listDir(const char *dirName){
+    printDirFiles(dirName, NULL, 0);
+}
 int main(int argc, char const *argv[])
 {
-    listCurrDir();
+    if(argc == 1){
+        listCurrDir();
+    }
+    else{
+        listDir(argv[1]);
+    }
     return 0;
 }
 
