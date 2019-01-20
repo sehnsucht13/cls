@@ -1,0 +1,10 @@
+* CLS TODO
+* TODO Implement matching specific file types
+* TODO Implement config parsing for colors and filetypes
+* TODO Add recursive traversing of folders
+* TODO Create header file
+* TODO Create make file
+* TODO Implement a curses interface
+* TODO Implement fuzzy search in interface
+* TODO Write man page
+* TODO Write arg parser
