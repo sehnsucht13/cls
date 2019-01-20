@@ -2,6 +2,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <time.h>
+#include "FileFilters.h"
 
 struct dirent **dirFile;
 int numOfFiles;
@@ -11,11 +15,11 @@ void printColor(char *str, int colorNumber){
     printf("\033[1;38;5;%dm %s\n", colorNumber, str);
 }
 
-void printDirFiles(const char *dirName, int (*f) (const struct dirent *entry), int recursive){
+void printDirFilesNoRec(const char *dirName, int (*f) (const struct dirent *entry)){
     numOfFiles = scandir(dirName, &dirFile, f, NULL);
-    int currIndex = 0;
+    int currIndex;
     if (numOfFiles >=0){
-        for(currIndex; currIndex < numOfFiles; currIndex++){
+        for(currIndex = 0; currIndex < numOfFiles; currIndex++){
             if(dirFile[currIndex]->d_type == DT_DIR){
                 printColor(dirFile[currIndex]->d_name, 52);
             }
@@ -29,10 +33,34 @@ void printDirFiles(const char *dirName, int (*f) (const struct dirent *entry), i
     }
 }
 
+void printFilesStat(const char *dirName, int (*f) (const struct dirent *entry)){
+  numOfFiles = scandir(dirName, &dirFile, f, NULL);
+  int currIndex;
+  // Holds the stat for the current file
+  struct stat file_stat;
+  int status;
+  char *destString;
+  if (numOfFiles >= 0){
+	for(currIndex = 0; currIndex < numOfFiles; currIndex++){
+	  destString = malloc(strlen(dirName) + 1 + strlen(dirFile[currIndex]->d_name));
+	  strcat(destString, dirName);
+	  strcat(destString, "/");
+	  strcat(destString, dirFile[currIndex]->d_name);
+	  status = stat(destString, &file_stat);
+	  if(status != -1){
+		printf("Here is the atime: %s\n", ctime(&file_stat.st_atime));
+	  }
+	  printf("destSTring: %s\n", destString);
+	  free(destString);
+	}
+  }
+}
+
 void listCurrDir(){
     char *currWorkDir = getcwd(NULL, 0);
     if(currWorkDir != NULL){
-    printDirFiles(currWorkDir, NULL, 0);
+    /* printDirFilesNoRec(currWorkDir, NULL); */
+	  printFilesStat(currWorkDir, NULL);
     }
     else{
         printf("Error occured while displaying current directory\n");
@@ -40,7 +68,7 @@ void listCurrDir(){
 }
 
 void listDir(const char *dirName){
-    printDirFiles(dirName, NULL , 0);
+    printFilesStat(dirName, NULL);
 }
 
 
