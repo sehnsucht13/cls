@@ -21,12 +21,16 @@ int displayAllFiles(const struct dirent *entry){
     return 1;
 }
 
+void printColor(char *str, int colorNumber){
+    printf("\033[1;38;5;%dm %s\n", colorNumber, str);
+}
+
 void printDirFiles(char *dirName, int (*f) (const struct dirent *entry), int recursive){
     numOfFiles = scandir(dirName, &dirFile, f, NULL);
     int currIndex = 0;
     if (numOfFiles >=0 && recursive == 0){
         for(currIndex; currIndex < numOfFiles; currIndex++){
-            printf("%s\n", dirFile[currIndex]->d_name);
+                printColor(dirFile[currIndex]->d_name, 197);
         }
     }
     else{
@@ -47,6 +51,8 @@ void listCurrDir(){
 void listDir(const char *dirName){
     printDirFiles(dirName, NULL, 0);
 }
+
+
 int main(int argc, char const *argv[])
 {
     if(argc == 1){
