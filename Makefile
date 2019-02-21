@@ -5,7 +5,7 @@ DEPS = FileFilters.h
 %.o : %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-cls: cls.o FileFilters.o
+build: cls.o FileFilters.o
 	$(CC) -o cls cls.o FileFilters.o
 
 clean:

@@ -7,31 +7,10 @@
 #include <time.h>
 #include "FileFilters.h"
 
-struct dirent **dirFile;
-int numOfFiles;
-
 
 void printColor(char *str, int colorNumber){
     printf("\033[1;38;5;%dm %s\n", colorNumber, str);
 }
-
-/* void printDirFilesRec(const char *dirName, int (*f) (const struct dirent *entry)){ */
-/*     numOfFiles = scandir(dirName, &dirFile, f, NULL); */
-/*     int currIndex; */
-/* 	char *newPath; */
-/*     if(numOfFiles >= 0){ */
-/*         for(currIndex = 0; currIndex < numOfFiles; currIndex++){ */
-/*             if(dirFile[currIndex]->d_type == DT_DIR){ */
-/* 			  newPath = glueFilePath(dirName, dirFile[currIndex] ->d_name); */
-/* 			  printDirFilesRec(newPath, f); */
-/*             } */
-/* 			else{ */
-/* 			  printColor(dirFile[currIndex] -> d_name, 197); */
-/* 			} */
-/*         } */
-/*     } */
-
-/* } */
 
 char *concatFilePaths(const char *base, char *new) {
   int baseLen = strlen(base);
@@ -65,7 +44,8 @@ struct dirent **dFile;
 
 
 void printDirFilesNoRec(const char *dirName, int (*f) (const struct dirent *entry)){
-    numOfFiles = scandir(dirName, &dirFile, f, NULL);
+    struct dirent **dirFile;
+    int numOfFiles = scandir(dirName, &dirFile, f, NULL);
     int currIndex;
     if (numOfFiles >=0){
         for(currIndex = 0; currIndex < numOfFiles; currIndex++){
@@ -83,7 +63,8 @@ void printDirFilesNoRec(const char *dirName, int (*f) (const struct dirent *entr
 }
 
 void printFilesStat(const char *dirName, int (*f) (const struct dirent *entry)){
-  numOfFiles = scandir(dirName, &dirFile, f, NULL);
+  struct dirent **dirFile;
+  int numOfFiles = scandir(dirName, &dirFile, f, NULL);
   int currIndex;
   // Holds the stat for the current file
   struct stat file_stat;
@@ -98,7 +79,6 @@ void printFilesStat(const char *dirName, int (*f) (const struct dirent *entry)){
 	  if(status != -1){
 		printf("Here is the atime: %s\n", ctime(&file_stat.st_atime));
 	  }
-	  printf("destSTring: %s\n", destString);
 	  free(destString);
 	}
   }
