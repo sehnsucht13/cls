@@ -15,6 +15,55 @@ void printColor(char *str, int colorNumber){
     printf("\033[1;38;5;%dm %s\n", colorNumber, str);
 }
 
+/* void printDirFilesRec(const char *dirName, int (*f) (const struct dirent *entry)){ */
+/*     numOfFiles = scandir(dirName, &dirFile, f, NULL); */
+/*     int currIndex; */
+/* 	char *newPath; */
+/*     if(numOfFiles >= 0){ */
+/*         for(currIndex = 0; currIndex < numOfFiles; currIndex++){ */
+/*             if(dirFile[currIndex]->d_type == DT_DIR){ */
+/* 			  newPath = glueFilePath(dirName, dirFile[currIndex] ->d_name); */
+/* 			  printDirFilesRec(newPath, f); */
+/*             } */
+/* 			else{ */
+/* 			  printColor(dirFile[currIndex] -> d_name, 197); */
+/* 			} */
+/*         } */
+/*     } */
+
+/* } */
+
+char *concatFilePaths(const char *base, char *new) {
+  int baseLen = strlen(base);
+  int newLen = strlen(new);
+  char *newPath = malloc((baseLen + newLen) * sizeof(char));
+  newPath[0] = '\0';
+  strcat(newPath, base);
+  strcat(newPath, new);
+  strcat(newPath, "/");
+  return newPath;
+}
+
+void printDirFilesRec(const char *dirName, int (*f)(const struct dirent *entry)) {
+  char *newDirPath;
+struct dirent **dFile;
+  int files = scandir(dirName, &dFile, f, NULL);
+  printf("Here is the path %s\n", dirName);
+  if (files >= 0) {
+    for (int i = 0; i < files; ++i) {
+      if (dFile[i]->d_type == DT_DIR){
+		/* printf("Here is the folder name %s\n", dirFile[i]->d_name); */
+		newDirPath = concatFilePaths(dirName, dFile[i]->d_name);
+		printDirFilesRec(newDirPath, f);
+      }
+	  else {
+		printf("Here is a file %s\n", dFile[i]->d_name);
+      }
+    }
+  }
+}
+
+
 void printDirFilesNoRec(const char *dirName, int (*f) (const struct dirent *entry)){
     numOfFiles = scandir(dirName, &dirFile, f, NULL);
     int currIndex;
@@ -42,9 +91,8 @@ void printFilesStat(const char *dirName, int (*f) (const struct dirent *entry)){
   char *destString;
   if (numOfFiles >= 0){
 	for(currIndex = 0; currIndex < numOfFiles; currIndex++){
-	  destString = malloc(strlen(dirName) + 1 + strlen(dirFile[currIndex]->d_name));
+	  destString = malloc(strlen(dirName) + strlen(dirFile[currIndex]->d_name));
 	  strcat(destString, dirName);
-	  strcat(destString, "/");
 	  strcat(destString, dirFile[currIndex]->d_name);
 	  status = stat(destString, &file_stat);
 	  if(status != -1){
@@ -59,8 +107,7 @@ void printFilesStat(const char *dirName, int (*f) (const struct dirent *entry)){
 void listCurrDir(){
     char *currWorkDir = getcwd(NULL, 0);
     if(currWorkDir != NULL){
-    /* printDirFilesNoRec(currWorkDir, NULL); */
-	  printFilesStat(currWorkDir, NULL);
+    printDirFilesNoRec(currWorkDir, NULL);
     }
     else{
         printf("Error occured while displaying current directory\n");
@@ -78,7 +125,7 @@ int main(int argc, char const *argv[])
         listCurrDir();
     }
     else{
-        listDir(argv[1]);
+	  printDirFilesRec(argv[1], displayAlmostAll);
     }
     return 0;
 }
